@@ -1,26 +1,19 @@
-CC := gcc
-CFLAGS := -Wall -Wextra
-
+# this makefile is bad, not in use
 SRC_DIR := .
 BUILD_DIR := build
 
-SRCS := $(wildcard $(SRC_DIR)/**/*.c $(SRC_DIR)/*.c)
-OBJS := $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SRCS))
+SRCS := $(wildcard $(SRC_DIR)/*.c)
+OBJS := $(patsubst $(SRC_DIR)/%.c, $(BUILD_DIR)/%.o, $(SRCS))
 
-TARGET := chess
+CFLAGS := -Wall -Wextra
 
-.PHONY: all clean
+all: chess
 
-all: $(BUILD_DIR) $(TARGET)
-
-$(BUILD_DIR):
-	mkdir -p $(BUILD_DIR)
+chess: $(OBJS)
+	@gcc $(CFLAGS) chess.c myconstants.c pawn.c knight.c king.c bishop.c rook.c -o chess
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
-$(TARGET): $(OBJS)
-	$(CC) $(CFLAGS) $^ -o $@
+	@gcc -c $(CFLAGS) $< -o $@
 
 clean:
-	rm -rf $(BUILD_DIR) $(TARGET)
+	rm -rf $(BUILD_DIR)/*.o chess.exe
