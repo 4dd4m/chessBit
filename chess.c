@@ -1,158 +1,26 @@
 #include <stdio.h>
 #include "myconstants.h"
 #include "macros.h"
+#include "pawn.h"
+#include "knight.h"
+#include "king.h"
+#include "bishop.h"
+#include "rook.h"
 
-
-/**************************
- Attacks
-***************************/
-// attacks table [side][square]
-U64 pawnAttacks[2][64];
-U64 knightAttacks[64];
-U64 kingAttacks[64];
-U64 bishopAttacks[64];
-U64 rookAttacks[64];
-U64 queenAttacks[64];
-
-U64 maskPawnAttacks(int square, int sideToMove){
-    U64 board = 0ULL;
-    U64 attacks = 0ULL;
-
-    //set piece on board
-    setBit(board, square);
-
-    //white pawns
-    if(sideToMove == white){
-        if((board >> 7) & not_A_file) attacks |= (board >> 7);
-        if((board >> 9) & not_H_file) attacks |= (board >> 9);
-    }else{ // black pawns
-        if((board << 7) & not_H_file) attacks |= (board << 7);
-        if((board << 9) & not_A_file) attacks |= (board << 9);
-    }
-
-    return attacks;
+enum {
+    a8, b8, c8, d8, e8, f8, g8, h8,
+    a7, b7, c7, d7, e7, f7, g7, h7,
+    a6, b6, c6, d6, e6, f6, g6, h6,
+    a5, b5, c5, d5, e5, f5, g5, h5,
+    a4, b4, c4, d4, e4, f4, g4, h4,
+    a3, b3, c3, d3, e3, f3, g3, h3,
+    a2, b2, c2, d2, e2, f2, g2, h2,
+    a1, b1, c1, d1, e1, f1, g1, h1
 };
 
-U64 maskKnightAttacks(int square){
-    U64 board = 0ULL;
-    U64 attacks = 0ULL;
-
-    //set piece on board
-    setBit(board, square);
-
-    if((board << 17) & not_A_file) attacks |= (board << 17);
-    if((board << 15) & not_H_file) attacks |= (board << 15);
-    if((board << 10) & not_AB_file) attacks |= (board << 10);
-    if((board << 6)  & not_GH_file) attacks |= (board << 6);
-
-
-    if((board >> 6) & not_AB_file) attacks |= (board >> 6);
-    if((board >> 10) & not_GH_file) attacks |= (board >> 10);
-    if((board >> 15) & not_A_file) attacks |= (board >> 15);
-    if((board >> 17) & not_H_file) attacks |= (board >> 17);
-
-
-    return attacks;
-}
-U64 maskKingAttacks(int square){
-    U64 board = 0ULL;
-    U64 attacks = 0ULL;
-
-    //set piece on board
-    setBit(board, square);
-
-    if(board >> 8) attacks |= (board >> 8);
-    if((board >> 9) & not_H_file) attacks |= (board >> 9);
-    if((board >> 7) & not_A_file) attacks |= (board >> 7);
-    if((board >> 1) & not_H_file) attacks |= (board >> 1);
-
-    if(board << 8) attacks |= (board << 8);
-    if((board << 9) & not_A_file) attacks |= (board << 9);
-    if((board << 7) & not_H_file) attacks |= (board << 7);
-    if((board << 1) & not_A_file) attacks |= (board << 1);
-
-    return attacks;
-}
-U64 maskBishopAttacks(int square){
-    U64 board = 0ULL;
-    U64 attacks = 0ULL;
-
-    //set piece on board
-    setBit(board, square);
-    int ranks, files;
-
-    int targetRank = square / 8;
-    int targetFile = square % 8;
-
-    for (ranks = targetRank + 1, files = targetFile +1; ranks <= 6 && files <= 6; ranks++, files++) {
-        attacks |= (1ULL << (ranks * 8 + files));
-    }
-    for (ranks = targetRank - 1, files = targetFile +1; ranks >= 1 && files <= 6; ranks--, files++) {
-        attacks |= (1ULL << (ranks * 8 + files));
-    }
-    for (ranks = targetRank + 1, files = targetFile - 1; ranks <= 6 && files >= 1; ranks++, files--) {
-        attacks |= (1ULL << (ranks * 8 + files));
-    }
-    for (ranks = targetRank - 1, files = targetFile - 1; ranks >= 1 && files >= 1; ranks--, files--) {
-        attacks |= (1ULL << (ranks * 8 + files));
-    }
-    return attacks;
-}
-U64 maskRookAttacks(int square){
-    U64 board = 0ULL;
-    U64 attacks = 0ULL;
-
-    //set piece on board
-    setBit(board, square);
-
-    int ranks, files;
-
-    int targetRank = square / 8;
-    int targetFile = square % 8;
-
-    for (ranks = targetRank + 1; ranks <= 6; ranks++) {
-        attacks |= (1ULL << (ranks * 8 + targetFile));
-    }
-    for (ranks = targetRank - 1; ranks >= 1; ranks--) {
-        attacks |= (1ULL << (ranks * 8 + targetFile));
-    }
-
-    for (files = targetRank + 1; files <= 6; files++) {
-        attacks |= (1ULL << (targetRank * 8 + files));
-    }
-
-    for (files = targetRank - 1; files >= 1; files--) {
-        attacks |= (1ULL << (targetRank * 8 + files));
-    }
-    return attacks;
-}
-
-void initPawnAttacks(){
-    for (int square = 0; square < 64; square++) {
-        pawnAttacks[white][square] = maskPawnAttacks(square, white);
-        pawnAttacks[black][square] = maskPawnAttacks(square, black);
-    }
-}
-void initKnightAttacks(){
-    for (int square = 0; square < 64; square++) {
-        knightAttacks[square] = maskKnightAttacks(square);
-    }
-}
-void initKingAttacks(){
-    for (int square = 0; square < 64; square++) {
-        kingAttacks[square] = maskKingAttacks(square);
-    }
-}
-void initBishopAttacks(){
-    for (int square = 0; square < 64; square++) {
-        bishopAttacks[square] = maskBishopAttacks(square);
-    }
-}
-void initRookAttacks(){
-    for (int square = 0; square < 64; square++) {
-        rookAttacks[square] = maskRookAttacks(square);
-    }
-}
+enum {
+    white, black
+};
 
 void printBitBoard(U64 bitboard) {
     for (int rank = 0; rank < 8; ++rank) {
@@ -194,9 +62,8 @@ void initializers(){
 
 int main() {
     initializers();
-    // the board
     U64 board = 0ULL;
-    board = maskRookAttacks(e4);
+    board = maskPawnAttacks(e4, black);
     printBitBoard(board);
     //boardHelper();
 
