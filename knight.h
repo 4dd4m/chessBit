@@ -4,8 +4,6 @@
 #include "myconstants.h"
 #include "macros.h"
 
-extern U64 knightAttacks[64];
-
 U64 maskKnightAttacks(int square);
 void initKnightAttacks();
 

@@ -4,9 +4,11 @@
 #include "myconstants.h"
 #include "macros.h"
 
-extern U64 rookAttacks[64];
-
 U64 maskRookAttacks(int square);
+
+// calculating rook attacks in game with a blocking board
+U64 rookAttacks_in_game(int square, U64 blockingBoard);
+
 void initRookAttacks();
 
 #endif //CHESSBIT_ROOK_H

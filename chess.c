@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include "myconstants.h"
 #include "macros.h"
 #include "pawn.h"
@@ -6,6 +7,10 @@
 #include "king.h"
 #include "bishop.h"
 #include "rook.h"
+#include "helpers.h"
+#include "random.h"
+
+extern char* squareToCoordinates[];
 
 enum {
     a8, b8, c8, d8, e8, f8, g8, h8,
@@ -62,12 +67,14 @@ void initializers(){
 
 int main() {
     initializers();
-    U64 board = 0ULL;
-    board = maskPawnAttacks(e4, black);
-    printBitBoard(board);
-    //boardHelper();
+
+    printBitBoard(getRandomU32Number());
+    printBitBoard(getRandomU32Number() & 0xffff);
+    printBitBoard(getRandomU64Number());
+    
+    printBitBoard(generateMagicNumber());
 
     return 0;
 }
 
-// continue with 8
+// continue with 15
